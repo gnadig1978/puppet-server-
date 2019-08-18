@@ -1,0 +1,63 @@
+How to install puppet master with two Clients on centos  7.X
+
+192.168.0.114 puppet.sukhoi.net  ======> server 
+192.168.0.117 mirage.sukhoi.net  ======> clients 
+192.168.0.118 agni.sukhoi.net    ======> clients
+
+Server: 
+
+1) install Centos 7.0
+2) yum -y update
+3) systemctl stop firewalld;systemctl disable firewalld (disable the firewall) 
+4) yum -y install http://yum.puppetlabs.com/puppetlabs-release-el-7.noarch.rpm
+5) yum -y install puppet-server
+6) vi /etc/puppet/puppet.conf  ================> config file. 
+6.1) [main]
+6.2) dns_alt_names=puppet,puppet.sukhoi.net
+6.3) certname=puppet
+
+7) sudo -u puppet puppet master --no-daemonize --verbose   (Command to generate a certificate for server) 
+8) systemctl start puppetmaster;systemctl enable puppetmaster
+
+Note: Pupet server configured 
+
+Client config
+
+1) install Centos 7.0
+2) yum -y update
+3) systemctl stop firewalld ; systemctl disable firewalld (disable the firewall) 
+4) yum -y install http://yum.puppetlabs.com/puppetlabs-release-el-7.noarch.rpm
+5) yum -y install puppet
+6) vi /etc/puppet/puppet.conf
+6.1) [agent]
+     server=puppet.sukhoi.net
+     
+Note: Puppet client config configured .
+
+[root@agni ~]# puppet agent -t       (Generate the signing request certificate from client node)    
+Info: Creating a new SSL key for agni.sukhoi.net
+Info: Caching certificate for ca
+Info: csr_attributes file loading from /etc/puppet/csr_attributes.yaml
+Info: Creating a new SSL certificate request for agni.sukhoi.net
+Info: Certificate Request fingerprint (SHA256): F1:5D:B8:BD:35:7F:31:33:F3:27:90:37:E0:7F:44:C8:E2:6F:13:DF:52:EE:C8:0B:8D:2E:C5:90:53:89:F4:45
+Info: Caching certificate for ca
+
+To test from the puppet server: 
+
+1) puppet cert list
+2) puppet cert sign agni.sukhoi.net
+3) puppet cert sign mirage.sukhoi.net
+
+[root@puppet requests]# puppet cert list -all
++ "agni.sukhoi.net"   (SHA256) 0A:28:6E:2E:20:27:C6:59:BD:F1:43:87:83:5F:57:93:04:76:F3:46:0A:D1:10:44:09:D8:D8:98:68:B9:B4:08
++ "mirage.sukhoi.net" (SHA256) E5:92:7F:E8:07:5E:C0:C4:18:72:51:08:D1:03:A3:D8:3B:58:A9:3C:F3:A5:35:4B:26:C5:9E:B5:A8:B4:77:8A
++ "puppet"            (SHA256) 7C:3A:E7:51:A0:57:76:BD:E4:3C:73:BA:32:32:62:13:4D:EE:C4:DA:A9:89:87:F6:2B:31:11:B0:B1:70:87:1A (alt names: "DNS:puppet", "DNS:puppet.sukhoi.net")
+
+Regards
+Gurudatta N.R
+
+
+
+
+
+
